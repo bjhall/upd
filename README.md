@@ -25,23 +25,14 @@ upd.py input.vcf.gz --proband PB_ID --mother MOTHER_ID --father FATHER_ID --out 
 Where PB_ID/MOTHER_ID/FATHER_ID are the sample IDs from the vcf header.
 
 #### Optional parameters
-**--min_af (DEFAULT: 0.05)**
-Minimum population frequency required to include the SNP in the analysis.
-
-**--vep_af (DEFAULT: MAX_AF)**
-Specifies which CSQ (typically from VEP) field to be used when selecting SNPs. Getting population frequencies from other INFO fields are currenly not supported.
-
-**--min_gq (DEFAULT: 30)**
-Specifies the minimum GQ required to include a variant in the analysis. All three individuals' must have a GQ larged than or equal to this.
-
-**--min_sites (DEFAULT: 3)**
-Minimum number of consecutive UPD sites needed to call an UPD region.
-
-**--min_size (DEFAULT: 1000)**
-Minimum number of base pairs between first and last UPD site in a region required to call it.
-
-**--out_sites FILENAME**
-If given a BED file with all informative sites used to call regions will be written.
+Parameter | Description
+--------- | -----------
+**--min_af (DEFAULT: 0.05)** | Minimum population frequency required to include the SNP in the analysis.
+**--vep_af (DEFAULT: MAX_AF)** | Specifies which CSQ (typically from VEP) field to be used when selecting SNPs. Getting population frequencies from other INFO fields are currenly not supported.
+**--min_gq (DEFAULT: 30)** | Specifies the minimum GQ required to include a variant in the analysis. All three individuals' must have a GQ larged than or equal to this.
+**--min_sites (DEFAULT: 3)** | Minimum number of consecutive UPD sites needed to call an UPD region.
+**--min_size (DEFAULT: 1000)** | Minimum number of base pairs between first and last UPD site in a region required to call it.
+**--out_sites FILENAME** | If given, a BED file with all informative sites used to call regions will be written.
 
 
 ### Output files
