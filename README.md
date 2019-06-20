@@ -67,6 +67,19 @@ START_LOW | Earliest possible start positon of the UPD region (position of last 
 END_HIGH | Last possible end position of the UPD region (position of first anti-UPD site prior to the region)
 HIGH_SIZE | Upper bound of the estimated size of the called region. Distance between the surrounding anti-UPD sites.
 
+#### Informative sites (--out_sites)
+Fourth field indicates what type of field:
+
+Type | Description
+---- | -----------
+ANTI_UPD | Site where proband has inherited alleles from both parents (e.g. AA x BB = AB)
+UPD_MATERNAL_ORIGIN | Site where both alleles are inherited from the mother, or a fathers allele was deleted. (e.g. AA x BB = AA)
+UPD_PATERNAL_ORIGIN | Site where both alleles are inherited from the father, or a mothers allele was deleted. (e.g. AA x BB = BB)
+PB_HETEROZYGOUS | Heterozygous site in the proband (used only to call hetero/isodisomy)
+PB_HOMOZYGOUS | Homozygous site in the proband (used only to call hetero/isodisomy)
+UNINFORMATIVE | Various sites excluded from the analysis. Ignore these...
+
+
 ### Caveats
 The isodisomic/heterodisomic calling depends on estimating if there is a run of homozygousity in the called region. This is called using presence of heterozygous sites within the call, and should only be seen as a rough estimate for smaller calls. For more statistically sound detection of this, use e.g. bcftools roh to detect regions of homozygozity and combine the results.
 
