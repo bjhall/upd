@@ -41,9 +41,6 @@ def main():
     # Output individual informative sites if requested
     if opt.out_sites:
         output_informative_sites(opt.out_sites, site_calls)
-    
-
-        
 
 def get_UPD_informative_sites(vcf, opt, csq_fields, sids):
     """Get UPD calls for each informative SNP above given pop freq"""
