@@ -9,7 +9,7 @@ from cyvcf2 import VCF
 from upd.__version__ import __version__
 from upd.vcf_tools import parse_CSQ_header
 from upd.utils import (get_UPD_informative_sites, call_regions)
-from upd.bed_utils import (output_filtered_regions, output_informative_sites)
+from upd.bed_utils import (output_filtered_regions)
 
 LOG = logging.getLogger(__name__)
 handler = logging.StreamHandler()
@@ -27,8 +27,10 @@ def print_version(ctx, param, value):
     click.echo(__version__)
     ctx.exit()
 
-@click.command()
-@click.argument('vcf')
+@click.group()
+@click.option('--vcf',
+    type=click.Path(exists=True)
+)
 @click.option('--proband',
     help="ID of proband in VCF",
     required=True,
@@ -56,39 +58,19 @@ def print_version(ctx, param, value):
     default=30,
     show_default=True
 )
-@click.option('--min-sites',
-    help="Minimum UPD informative sites required to call a region",
-    default=3,
+@click.option('--loglevel', 
+    default='INFO', 
+    type=click.Choice(LOG_LEVELS),
+    help="Set the level of log output.", 
     show_default=True
 )
-@click.option('--min-size',
-    help="Minimum size (bp) required to call a region",
-    default=1000,
-    show_default=True
-)
-@click.option('-o','--out',
-    help="Output bed file of called regions",
-    type=click.Path(exists=False),
-    required=True
-)
-@click.option('--out-sites',
-    help="Output bed file of all informative sites",
-    type=click.Path(exists=False),
-)
-@click.option('--version', is_flag=True, callback=print_version,
-              expose_value=False, is_eager=True)
-@click.option('--loglevel', default='INFO', type=click.Choice(LOG_LEVELS),
-              help="Set the level of log output.", show_default=True)
 @click.pass_context
-def cli(context, vcf, proband, mother, father, vep_af, min_af, min_gq, min_sites, min_size, out, 
-        out_sites, loglevel):
-    """Annotate str variants with str status"""
+def cli(context, vcf, proband, mother, father, vep_af, min_af, min_gq, loglevel):
+    """Simple software to call UPD regions from germline exome/wgs trios"""
     # coloredlogs.install(level=loglevel)
-    LOG.setLevel(loglevel)
-    LOG.info("Running upd version %s", __version__)
     
     vcf_reader = VCF(vcf)
-    
+    context.obj = {}
     # Check if the given samples IDs exist in the VCF header
     sids = vcf_reader.samples
     if not all(elem in sids for elem in [proband, mother, father]):
@@ -107,7 +89,7 @@ def cli(context, vcf, proband, mother, father, vep_af, min_af, min_gq, min_sites
         context.abort()
     
     # Get all UPD informative sites into a list 
-    site_calls = get_UPD_informative_sites(
+    context.obj['site_calls'] = get_UPD_informative_sites(
         vcf=vcf_reader, 
         csq_fields=csq_fields, 
         sids=sids, 
@@ -118,15 +100,55 @@ def cli(context, vcf, proband, mother, father, vep_af, min_af, min_gq, min_sites
         vep_af=vep_af, 
         min_gq=min_gq
     )
-        
-    # Make region calls
-    calls = call_regions(site_calls)
 
-    # Output BED file with results
-    output_filtered_regions(out, calls, min_sites, min_size)
+@cli.command()
+@click.option('--min-sites',
+    help="Minimum UPD informative sites required to call a region",
+    default=3,
+    show_default=True
+)
+@click.option('--min-size',
+    help="Minimum size (bp) required to call a region",
+    default=1000,
+    show_default=True
+)
+@click.option('-o','--out',
+    help="Output bed file of all informative sites",
+    type=click.Path(exists=False),
+    default='-',
+)
+@click.pass_context
+def regions(context, min_sites, min_size, out):
+    """Call UPD regions"""
+    # Make region calls
+    calls = call_regions(context.obj['site_calls'])
+
+    out_lines = output_filtered_regions(calls, min_sites, min_size)
+
+    with click.open_file(out, 'w') as f:
+        for line in out_lines:
+            f.write(line)
+
+
+@cli.command()
+@click.option('-o','--out',
+    help="Output bed file of all informative sites",
+    type=click.Path(exists=False),
+    default='-',
+)
+@click.pass_context
+def sites(context, out):
+    """Prints the sites that are informative for UPD"""
+    site_type_name = [
+        "UNINFORMATIVE", "UPD_MATERNAL_ORIGIN", "UPD_PATERNAL_ORIGIN", "ANTI_UPD", 
+        "PB_HOMOZYGOUS", "PB_HETEROZYGOUS"
+    ]
     
-    # Output individual informative sites if requested
-    if out_sites:
-        output_informative_sites(out_sites, site_calls)
-    
-    
+    with click.open_file(out, 'w') as f:
+        for scall in context.obj['site_calls']:
+            f.write("{}\t{}\t{}\t{}\n".format(
+                scall['chrom'],
+                scall['pos']-1,
+                scall['pos'],
+                site_type_name[scall['call']]
+            ))

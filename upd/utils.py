@@ -7,6 +7,7 @@ ANTI_UPD            = 3
 PB_HOMOZYGOUS       = 4
 PB_HETEROZYGOUS     = 5
 
+
 def upd_site_call(gt_pb, gt_mo, gt_fa):
     """Call UPD informative sites
     
@@ -95,10 +96,14 @@ def get_UPD_informative_sites(vcf, csq_fields, sids, proband, mother, father, mi
         yield {'chrom':var.CHROM, 'pos':var.POS, 'call':pos_call}
 
 def call_regions(sites):
-    """Returns called regions
+    """Yields called regions
     
     Args:
         sites (iterable(dict))
+        outfile (str): Path to outfile for all sites
+
+    Yields:
+        putative_call (dict): UPD informative region 
     """
     opposite = {UPD_MATERNAL_ORIGIN:UPD_PATERNAL_ORIGIN, UPD_PATERNAL_ORIGIN:UPD_MATERNAL_ORIGIN}
     calls = []
