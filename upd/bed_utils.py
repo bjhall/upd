@@ -13,8 +13,7 @@ def output_filtered_regions(outfile, calls, min_sites=3, min_size=1000):
         min_size (int): Minimum size (bp) required to call a region
         
     """
-    out_line = "{}\t{}\t{}\tORIGIN={};TYPE={};LOW_SIZE={};INF_SITES={};SNPS={};HET_HOM={}/{};"
-               "OPP_SITES={};START_LOW={};END_HIGH={};HIGH_SIZE={}\n"
+    out_line = "{}\t{}\t{}\tORIGIN={};TYPE={};LOW_SIZE={};INF_SITES={};SNPS={};HET_HOM={}/{};OPP_SITES={};START_LOW={};END_HIGH={};HIGH_SIZE={}\n"
     with open(outfile, 'w') as out:
     
         for rcall in calls:

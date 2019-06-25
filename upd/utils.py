@@ -81,7 +81,7 @@ def get_UPD_informative_sites(vcf, csq_fields, sids, proband, mother, father, mi
             continue
         
         # Skip variants where any individual has GQ < threshold
-        if not all(gq >= min_gq for gq in gt_quals):
+        if not all(gq >= min_gq for gq in var.gt_quals):
             continue
 
         # Make UPD call for site and append to call list
