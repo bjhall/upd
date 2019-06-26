@@ -15,6 +15,7 @@ formatter = logging.Formatter(
         '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
 handler.setFormatter(formatter)
 LOG.addHandler(handler)
+LOG.setLevel(logging.INFO)
 
 LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
@@ -136,7 +137,7 @@ def regions(context, min_sites, min_size, out):
 
     with click.open_file(out, 'w') as f:
         for line in out_lines:
-            f.write(line)
+            f.write(line+'\n')
 
 
 @cli.command()
