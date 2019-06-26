@@ -1,3 +1,5 @@
+import logging
+
 from .vcf_tools import get_pop_AF
 
 UNINFORMATIVE       = 0
@@ -7,6 +9,7 @@ ANTI_UPD            = 3
 PB_HOMOZYGOUS       = 4
 PB_HETEROZYGOUS     = 5
 
+LOG = logging.getLogger(__name__)
 
 def upd_site_call(gt_pb, gt_mo, gt_fa):
     """Call UPD informative sites
@@ -99,9 +102,12 @@ def get_UPD_informative_sites(vcf, csq_fields, proband, mother, father, min_af=0
 def call_regions(sites):
     """Yields called regions
     
+    A putative_call is a collection of information from the variants in a upd region. 
+    The call is started if there are variants that indicates UPD maternal or paternal origin. When 
+    a anti upd site is encountered or the chromosome ends the call returned.
+    
     Args:
         sites (iterable(dict))
-        outfile (str): Path to outfile for all sites
 
     Yields:
         putative_call (dict): UPD informative region 
@@ -111,7 +117,7 @@ def call_regions(sites):
     putative_call = None
     prev = None
     last_seen_anti = {'chrom':'0', 'pos':0}
-
+    
     for c in sites:
         if not putative_call:
             # Create new putative call if UPD informative position
@@ -133,37 +139,44 @@ def call_regions(sites):
             # Save last positive which is definately not in UPD region
             if c["call"] == ANTI_UPD or not prev or c['chrom'] != prev['chrom']:
                 last_seen_anti = {'chrom':c['chrom'], 'pos':c['pos']}
+            
+            prev = c
+            continue
 
-        else:
-
-            # If an anti-UPD site or end of chromosome => close the putative call
-            if c["call"] == ANTI_UPD or c['chrom'] != putative_call['chrom']:
-                if c["call"] == ANTI_UPD:
-                    putative_call['end_hi'] = c['pos']-1
-                else:
-                    putative_call['end_hi'] = prev['pos']
-                calls.append(putative_call)
-                last_seen_anti = {'chrom': c['chrom'], 'pos': c['pos']}      
-                putative_call = None
-
+        # If an anti-UPD site or end of chromosome => close the putative call
+        if c["call"] == ANTI_UPD or c['chrom'] != putative_call['chrom']:
+            if c["call"] == ANTI_UPD:
+                putative_call['end_hi'] = c['pos']-1
             else:
-                # If site call is same as putative call => extend the putative region
-                if c['call'] == putative_call['call']:
-                    putative_call['end_lo'] = c['pos']
-                    putative_call['run_len'] += 1
+                LOG.info("Chromosome %s checked", putative_call['chrom'])
+                putative_call['end_hi'] = prev['pos']
+            
+            yield putative_call
+            
+            last_seen_anti = {'chrom': c['chrom'], 'pos': c['pos']}      
+            putative_call = None
+            prev = c
+            continue
 
-                if c['call'] == PB_HOMOZYGOUS:
-                    putative_call['hom_sites'] += 1
-                if c['call'] == PB_HETEROZYGOUS:
-                    putative_call['het_sites'] += 1
+        # If site call is same as putative call => extend the putative region
+        if c['call'] == putative_call['call']:
+            putative_call['end_lo'] = c['pos']
+            putative_call['run_len'] += 1
+
+        if c['call'] == PB_HOMOZYGOUS:
+            putative_call['hom_sites'] += 1
+        
+        if c['call'] == PB_HETEROZYGOUS:
+            putative_call['het_sites'] += 1
                     
-                # If site call is opposite (maternal<->paternal), count it. (This pretty much never happens?)
-                if c['call'] == opposite[putative_call['call']]:
-                    putative_call['opposites'] += 1
+        # If site call is opposite (maternal<->paternal), count it. (This pretty much never happens?)
+        if c['call'] == opposite[putative_call['call']]:
+            putative_call['opposites'] += 1
 
-                # Count total number of SNPs in the call region
-                putative_call['tot'] += 1
+        # Count total number of SNPs in the call region
+        putative_call['tot'] += 1
 
         prev = c
 
-    return calls
+    if putative_call:
+        yield putative_call
