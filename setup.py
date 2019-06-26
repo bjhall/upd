@@ -20,14 +20,8 @@ DESCRIPTION = 'Simple software to call UPD regions from germline exome/wgs trios
 URL = 'https://github.com/bjhall/upd'
 EMAIL = 'bjorn.hallstrom@skane.se'
 AUTHOR = 'Björn Hallström'
-REQUIRES_PYTHON = '<3.0'
 VERSION = None
 
-# What packages are required for this module to be executed?
-REQUIRED = [
-    'click',
-    'cyvcf2',
-]
 
 # What packages are optional?
 EXTRAS = {
@@ -40,6 +34,29 @@ EXTRAS = {
 # If you do change the License, remember to change the Trove Classifier for that!
 
 here = os.path.abspath(os.path.dirname(__file__))
+
+def parse_reqs(req_path='./requirements.txt'):
+    """Recursively parse requirements from nested pip files."""
+    install_requires = []
+    with io.open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as handle:
+        # remove comments and empty lines
+        lines = (line.strip() for line in handle
+                 if line.strip() and not line.startswith('#'))
+
+        for line in lines:
+            # check for nested requirements files
+            if line.startswith('-r'):
+                # recursively call this function
+                install_requires += parse_reqs(req_path=line[3:])
+
+            else:
+                # add the line as a new requirement
+                install_requires.append(line)
+
+    return install_requires
+
+# What packages are required for this module to be executed?
+REQUIRED = parse_reqs()
 
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.md' is present in your MANIFEST.in file!
@@ -121,7 +138,6 @@ setup(
     long_description_content_type='text/markdown',
     author=AUTHOR,
     author_email=EMAIL,
-    python_requires=REQUIRES_PYTHON,
     url=URL,
     packages=find_packages(exclude=('tests',)),
 
@@ -141,6 +157,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: Implementation :: CPython',
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Unix",

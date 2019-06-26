@@ -1,5 +1,6 @@
 import logging
-# import coloredlogs
+
+import coloredlogs
 import click
 
 from pprint import pprint as pp
@@ -10,12 +11,6 @@ from upd.utils import (get_UPD_informative_sites, call_regions)
 from upd.bed_utils import (output_filtered_regions)
 
 LOG = logging.getLogger(__name__)
-handler = logging.StreamHandler()
-formatter = logging.Formatter(
-        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-handler.setFormatter(formatter)
-LOG.addHandler(handler)
-LOG.setLevel(logging.INFO)
 
 LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
@@ -28,7 +23,8 @@ def print_version(ctx, param, value):
 
 @click.group()
 @click.option('--vcf',
-    type=click.Path(exists=True)
+    type=click.Path(exists=True),
+    required=True,
 )
 @click.option('--proband',
     help="ID of proband in VCF",
@@ -70,7 +66,7 @@ def print_version(ctx, param, value):
 @click.pass_context
 def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, loglevel):
     """Simple software to call UPD regions from germline exome/wgs trios"""
-    # coloredlogs.install(level=loglevel)
+    coloredlogs.install(level=loglevel)
     LOG.info("Running upd version %s", __version__)
 
     context.obj = {}
