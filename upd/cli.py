@@ -63,6 +63,12 @@ def print_version(ctx, param, value):
     help="Set the level of log output.", 
     show_default=True
 )
+@click.option('--version', 
+    is_flag=True, 
+    callback=print_version,
+    expose_value=False, 
+    is_eager=True
+)
 @click.pass_context
 def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, loglevel):
     """Simple software to call UPD regions from germline exome/wgs trios"""
