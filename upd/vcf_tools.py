@@ -1,3 +1,40 @@
+from cyvcf2 import VCF
+
+def check_samples(sids, proband, mother, father):
+    """Check if proband, mother and father exists in vcf
+    
+    Args:
+        sids (list): List of sample ids in VCF
+        proband (str): ID of proband in VCF
+        mother (str): ID of mother in VCF
+        father (str): ID of father in VCF
+    
+    Returns:
+        bool: if all samples exists in VCF
+    """
+    if not all(elem in sids for elem in [proband, mother, father]):
+        return False
+    
+    return True
+
+def get_vcf(vcf_path, proband, mother, father):
+    """Check and open a VCF
+    
+    Args:
+        vcf_path (str)
+        proband (str): ID of proband in VCF
+        mother (str): ID of mother in VCF
+        father (str): ID of father in VCF
+    
+    Returns:
+        vcf_reader (cyvcf2.VCF)
+        
+    """
+    vcf_reader = VCF(vcf_path)
+    if not check_samples(vcf_reader.samples, proband, mother, father):
+        raise SyntaxError("At least one of the given sample IDs do not exist in the VCF header")
+
+    return vcf_reader
 
 def get_header_desc(reader, header_id):
     """Get description field of an header field ID

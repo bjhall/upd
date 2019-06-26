@@ -4,10 +4,8 @@ import click
 
 from pprint import pprint as pp
 
-from cyvcf2 import VCF
-
 from upd.__version__ import __version__
-from upd.vcf_tools import parse_CSQ_header
+from upd.vcf_tools import (parse_CSQ_header, get_vcf)
 from upd.utils import (get_UPD_informative_sites, call_regions)
 from upd.bed_utils import (output_filtered_regions)
 
@@ -68,36 +66,32 @@ def print_version(ctx, param, value):
 def cli(context, vcf, proband, mother, father, vep_af, min_af, min_gq, loglevel):
     """Simple software to call UPD regions from germline exome/wgs trios"""
     # coloredlogs.install(level=loglevel)
-    
-    vcf_reader = VCF(vcf)
+    LOG.info("Running upd version %s", __version__)
+
     context.obj = {}
     # Check if the given samples IDs exist in the VCF header
-    sids = vcf_reader.samples
-    if not all(elem in sids for elem in [proband, mother, father]):
-        context.abort("At least one of the given sample IDs do not exist in the VCF header")
-    
-    # Parse the VEP CSQ header
     try:
+        vcf_reader = get_vcf(vcf, proband, mother, father)
         csq_fields = parse_CSQ_header(vcf_reader)
-    except ValueError as err:
-        context.abort(err)
-    
+    except Exception as err:
+        LOG.warning(err)
+        context.abort()
+
     # Make sure the given VEP field exists
     if vep_af not in csq_fields:
-        LOG.warning("The field {} does not exist in the VEP annotations".format(vep_af))
+        LOG.warning("The field %s does not exist in the VEP annotations", vep_af)
         LOG.info("Existing CSQ fields {}".format('|'.join(csq_fields)))
         context.abort()
     
     # Get all UPD informative sites into a list 
     context.obj['site_calls'] = get_UPD_informative_sites(
-        vcf=vcf_reader, 
-        csq_fields=csq_fields, 
-        sids=sids, 
-        proband=proband, 
-        mother=mother, 
-        father=father, 
-        min_af=min_af, 
-        vep_af=vep_af, 
+        vcf=vcf_reader,
+        csq_fields=csq_fields,
+        proband=proband,
+        mother=mother,
+        father=father,
+        min_af=min_af,
+        vep_af=vep_af,
         min_gq=min_gq
     )
 

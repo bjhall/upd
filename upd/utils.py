@@ -47,7 +47,7 @@ def upd_site_call(gt_pb, gt_mo, gt_fa):
     return UNINFORMATIVE
 
 
-def get_UPD_informative_sites(vcf, csq_fields, sids, proband, mother, father, min_af=0.05, 
+def get_UPD_informative_sites(vcf, csq_fields, proband, mother, father, min_af=0.05, 
                               vep_af='MAX_AF', min_gq=30):
     """Get UPD calls for each informative SNP above given pop freq
     
@@ -67,6 +67,12 @@ def get_UPD_informative_sites(vcf, csq_fields, sids, proband, mother, father, mi
 
     """
     site_calls = []
+    # Make UPD call for site and append to call list
+    sids = vcf.samples
+    proband_idx = sids.index(proband)
+    mother_idx  = sids.index(mother)
+    father_idx  = sids.index(father)
+
     for var in vcf:
     
         # Raise error if multi-allelic site
@@ -84,11 +90,6 @@ def get_UPD_informative_sites(vcf, csq_fields, sids, proband, mother, father, mi
         # Skip variants where any individual has GQ < threshold
         if not all(gq >= min_gq for gq in var.gt_quals):
             continue
-
-        # Make UPD call for site and append to call list
-        proband_idx = sids.index(proband)
-        mother_idx  = sids.index(mother)
-        father_idx  = sids.index(father)
 
         gt = var.gt_types
         pos_call = upd_site_call(gt[proband_idx], gt[mother_idx], gt[father_idx])
