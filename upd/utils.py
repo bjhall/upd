@@ -2,6 +2,8 @@ import logging
 
 from .vcf_tools import get_pop_AF
 
+LOG = logging.getLogger(__name__)
+
 UNINFORMATIVE       = 0
 UPD_MATERNAL_ORIGIN = 1
 UPD_PATERNAL_ORIGIN = 2
@@ -9,7 +11,6 @@ ANTI_UPD            = 3
 PB_HOMOZYGOUS       = 4
 PB_HETEROZYGOUS     = 5
 
-LOG = logging.getLogger(__name__)
 
 def upd_site_call(gt_pb, gt_mo, gt_fa):
     """Call UPD informative sites
@@ -75,8 +76,10 @@ def get_UPD_informative_sites(vcf, csq_fields, proband, mother, father, min_af=0
     proband_idx = sids.index(proband)
     mother_idx  = sids.index(mother)
     father_idx  = sids.index(father)
-
-    for var in vcf:
+    
+    nr_informative = 0
+    
+    for i,var in enumerate(vcf,1):
     
         # Raise error if multi-allelic site
         if len(var.ALT) > 1:
@@ -97,7 +100,11 @@ def get_UPD_informative_sites(vcf, csq_fields, proband, mother, father, min_af=0
         gt = var.gt_types
         pos_call = upd_site_call(gt[proband_idx], gt[mother_idx], gt[father_idx])
         
+        nr_informative += 1
         yield {'chrom':var.CHROM, 'pos':var.POS, 'call':pos_call}
+    
+    LOG.info("%s variants in vcf", i)
+    LOG.info("%s informative variants found", nr_informative)
 
 def call_regions(sites):
     """Yields called regions
@@ -119,6 +126,8 @@ def call_regions(sites):
     last_seen_anti = {'chrom':'0', 'pos':0}
     
     for c in sites:
+        if prev and (c['chrom'] != prev['chrom']):
+            LOG.info("Chromosome %s checked", prev['chrom'])
         if not putative_call:
             # Create new putative call if UPD informative position
             if c["call"] in [UPD_MATERNAL_ORIGIN, UPD_PATERNAL_ORIGIN]:
@@ -139,7 +148,7 @@ def call_regions(sites):
             # Save last positive which is definately not in UPD region
             if c["call"] == ANTI_UPD or not prev or c['chrom'] != prev['chrom']:
                 last_seen_anti = {'chrom':c['chrom'], 'pos':c['pos']}
-            
+
             prev = c
             continue
 
@@ -148,7 +157,6 @@ def call_regions(sites):
             if c["call"] == ANTI_UPD:
                 putative_call['end_hi'] = c['pos']-1
             else:
-                LOG.info("Chromosome %s checked", putative_call['chrom'])
                 putative_call['end_hi'] = prev['pos']
             
             yield putative_call
@@ -177,6 +185,8 @@ def call_regions(sites):
         putative_call['tot'] += 1
 
         prev = c
+
+    LOG.info("Chromosome %s checked", prev['chrom'])
 
     if putative_call:
         yield putative_call

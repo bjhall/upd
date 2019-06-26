@@ -8,7 +8,7 @@ Simple software to call UPD regions from germline exome/wgs trios.
 
 `pip install --editable .` or `python setup.py install`
 
-The only dependency is cyvcf2 and click. If cyvcf2 does not install please try to install it 
+The only dependencies are cyvcf2, click and coloredlogs. If cyvcf2 does not install please try to install it 
 manually with [bioconda](https://anaconda.org/bioconda/cyvcf2) and then run the command above.
 
 
