@@ -72,23 +72,27 @@ def parse_CSQ_header(reader):
     csq_format = csq_format_str.split('|')
     return csq_format
 
-def get_pop_AF(vep_data, vep_fields, AF_str):
+def get_pop_AF(variant, vep_fields, af_tag):
     """Extract population frequency from VEP annotations.
     
     Args:
-        vep_data (str): VEP annotation from vcf INFO field
+        variant (cyvcf2.Variant)
         vep_fields (list): Description of VEP annotation
-        AF_str (str): Name of AF field to parse
+        af_tag (str): Name of AF field to parse
     
     Returns:
         freq (float): The annotated frequency, returns 0 if no data
     """
+    freq = 0
+    if vep_fields:
+        vep_data = variant.INFO['CSQ']
+        first_vep_str = vep_data.split(',')[0]
+        data = first_vep_str.split('|')
 
-    first_vep_str = vep_data.split(',')[0]
-    data = first_vep_str.split('|')
-
-    for i in range(len(data)):
-        if vep_fields[i] == AF_str:
-            return float(data[i] or 0)
-
-    return 0
+        for i in range(len(data)):
+            if vep_fields[i] == af_tag:
+                freq = data[i]
+    else:
+        freq = variant.INFO.get(af_tag)
+            
+    return float(freq or 0)

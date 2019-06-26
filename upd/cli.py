@@ -41,10 +41,14 @@ def print_version(ctx, param, value):
     help="ID of father in VCF",
     required=True,
 )
-@click.option('--vep-af',
-    help="Which VEP fields to use for population frequency filtering",
+@click.option('--af-tag',
+    help="Which field to use for population frequency filtering",
     default='MAX_AF',
     show_default=True
+)
+@click.option('--vep',
+    help="If af-tag is in VEP annotation",
+    is_flag=True,
 )
 @click.option('--min-af',
     help="Minimum SNP frequency",
@@ -63,7 +67,7 @@ def print_version(ctx, param, value):
     show_default=True
 )
 @click.pass_context
-def cli(context, vcf, proband, mother, father, vep_af, min_af, min_gq, loglevel):
+def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, loglevel):
     """Simple software to call UPD regions from germline exome/wgs trios"""
     # coloredlogs.install(level=loglevel)
     LOG.info("Running upd version %s", __version__)
@@ -72,16 +76,27 @@ def cli(context, vcf, proband, mother, father, vep_af, min_af, min_gq, loglevel)
     # Check if the given samples IDs exist in the VCF header
     try:
         vcf_reader = get_vcf(vcf, proband, mother, father)
-        csq_fields = parse_CSQ_header(vcf_reader)
     except Exception as err:
         LOG.warning(err)
         context.abort()
 
-    # Make sure the given VEP field exists
-    if vep_af not in csq_fields:
-        LOG.warning("The field %s does not exist in the VEP annotations", vep_af)
-        LOG.info("Existing CSQ fields {}".format('|'.join(csq_fields)))
-        context.abort()
+    csq_fields = None
+    if vep:
+        try:
+            csq_fields = parse_CSQ_header(vcf_reader)
+        except Exception as err:
+            LOG.warning(err)
+            context.abort()
+        
+        # Make sure the given VEP field exists
+        if af_tag not in csq_fields:
+            LOG.warning("The field %s does not exist in the VEP annotations", af_tag)
+            LOG.info("Existing CSQ fields {}".format('|'.join(csq_fields)))
+            context.abort()
+    else:
+        if not vcf_reader.contains(af_tag):
+            LOG.warning("The field %s does not exist in the VCF", af_tag)
+            context.abort()
     
     # Get all UPD informative sites into a list 
     context.obj['site_calls'] = get_UPD_informative_sites(
@@ -91,7 +106,7 @@ def cli(context, vcf, proband, mother, father, vep_af, min_af, min_gq, loglevel)
         mother=mother,
         father=father,
         min_af=min_af,
-        vep_af=vep_af,
+        af_tag=af_tag,
         min_gq=min_gq
     )
 

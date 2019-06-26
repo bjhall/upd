@@ -48,13 +48,13 @@ def upd_site_call(gt_pb, gt_mo, gt_fa):
 
 
 def get_UPD_informative_sites(vcf, csq_fields, proband, mother, father, min_af=0.05, 
-                              vep_af='MAX_AF', min_gq=30):
+                              af_tag='MAX_AF', min_gq=30):
     """Get UPD calls for each informative SNP above given pop freq
     
     Args:
         vcf (cyvcf2.VCF)
         min_af (float): Minimum allele frequency to consider SNP
-        vep_af (str): Key to AF in VEP annotation
+        af_tag (str): Key to AF in annotation
         min_gq (int): Minimum GQ to consider variant
         csq_fields (list): describes VEP annotation
         sids (cyvcf2.samples): describes what position inds have in VCF
@@ -84,7 +84,7 @@ def get_UPD_informative_sites(vcf, csq_fields, proband, mother, father, min_af=0
             continue
         
         # Skip variants with population frequency < threshold
-        if min_af > get_pop_AF(var.INFO["CSQ"], csq_fields, vep_af):
+        if min_af > get_pop_AF(var, csq_fields, af_tag):
             continue
         
         # Skip variants where any individual has GQ < threshold
