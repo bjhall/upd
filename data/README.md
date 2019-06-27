@@ -1,7 +1,7 @@
 test.vcf.gz is a randomly generated example vcf to be used for testing. Execute the following:
 
 ```bash
-python -m upd data/test.vcf.gz --proband TEST_PROBAND --mother TEST_MOTHER --father TEST_FATHER --out /dev/stdout
+upd --vcf data/test.vcf.gz --proband TEST_PROBAND --mother TEST_MOTHER --father TEST_FATHER --vep regions
 ```
 
 Expected output:

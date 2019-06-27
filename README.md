@@ -6,39 +6,44 @@ Simple software to call UPD regions from germline exome/wgs trios.
 
 ### Installation
 
-The only dependency is cyvcf2. Only tested on python 2.7...
+`pip install --editable .` or `python setup.py install`
+
+The only dependencies are cyvcf2, click and coloredlogs. If cyvcf2 does not install please try to install it 
+manually with [bioconda](https://anaconda.org/bioconda/cyvcf2) and then run the command above.
 
 
 ### Input VCF requirements
 
 * Trio (proband-mother-father) VCF is required (i.e. all three individuals in the same VCF).
 * GQ must be present in genotype fields.
-* Must be annotated with VEP and have some sort of population frequency field in the CSQ annotation (default: MAX_AF)
+* Must be annotated with some sort of population frequency. This can also be in the CSQ annotation (default: MAX_AF), if so use `--vep`
 
 
 ### Running
 
 ```bash
-upd.py input.vcf.gz --proband PB_ID --mother MOTHER_ID --father FATHER_ID --out upd_regions.bed
+upd --vcf input.vcf.gz --proband PB_ID --mother MOTHER_ID --father FATHER_ID regions --out upd_regions.bed
 ```
 
 Where PB_ID/MOTHER_ID/FATHER_ID are the sample IDs from the vcf header.
 
 #### Optional parameters
-Parameter | Description
---------- | -----------
-**--min_af (DEFAULT: 0.05)** | Minimum population frequency required to include the SNP in the analysis.
-**--vep_af (DEFAULT: MAX_AF)** | Specifies which CSQ (typically from VEP) field to be used when selecting SNPs. Getting population frequencies from other INFO fields are currenly not supported.
-**--min_gq (DEFAULT: 30)** | Specifies the minimum GQ required to include a variant in the analysis. All three individuals' must have a GQ larged than or equal to this.
-**--min_sites (DEFAULT: 3)** | Minimum number of consecutive UPD sites needed to call an UPD region.
-**--min_size (DEFAULT: 1000)** | Minimum number of base pairs between first and last UPD site in a region required to call it.
-**--out_sites FILENAME** | If given, a BED file with all informative sites used to call regions will be written.
+Command |Parameter | Description
+------- |--------- | -----------
+base | **--min-af (DEFAULT: 0.05)** | Minimum population frequency required to include the SNP in the analysis.
+base | **--af-tag (DEFAULT: MAX_AF)** | Specifies which frequency field to be used when selecting SNPs.
+base | **--min-gq (DEFAULT: 30)** | Specifies the minimum GQ required to include a variant in the analysis. All three individuals' must have a GQ larged than or equal to this.
+base | **--vep (flag)** | If given, search the CSQ field for `af-tag`
+base | **--vep (flag)** | If given, search the CSQ field for `af-tag`
+regions | **--min-sites (DEFAULT: 3)** | Minimum number of consecutive UPD sites needed to call an UPD region.
+regions | **--min-size (DEFAULT: 1000)** | Minimum number of base pairs between first and last UPD site in a region required to call it.
+regions/sites | **--out (DEFAULT: stdout)** | If the results should be printed to a file
 
 
-### Output files
+### Output
 
-#### Called regions (--out)
-BED file of all called regions fulfilling the --max_sites and --max_size filter criteria, including some annotation.
+#### Called regions (udp regions)
+BED file of all called regions fulfilling the --min-sites and --min-size filter criteria, including some annotation.
 
 Example call:
 ```
@@ -53,12 +58,12 @@ LOW_SIZE | Lower bound of the estimated size of the called region. Distance betw
 INF_SITES | Number of UPD informative sites in the called regions
 SNPS | Total number of SNPs in the region
 HET_HOM | Number of heterozygous and homozygous sites in the region. Used to indicate if region has LOH
-OPP_SITES | Number of sites in the region that have the opposite parental origin. So far I've never seen any other number than 0...
+OPP_SITES | Number of sites in the region that have the opposite parental origin. So no other number than 0 have been observed...
 START_LOW | Earliest possible start positon of the UPD region (position of last anti-UPD site prior to the region)
 END_HIGH | Last possible end position of the UPD region (position of first anti-UPD site prior to the region)
 HIGH_SIZE | Upper bound of the estimated size of the called region. Distance between the surrounding anti-UPD sites.
 
-#### Informative sites (--out_sites)
+#### Informative sites (upd sites)
 Fourth field indicates what type of field:
 
 Type | Description
