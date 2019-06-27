@@ -28,7 +28,6 @@ def upd_site_call(gt_pb, gt_mo, gt_fa):
     """
 
     opposite = {0:3, 3:0}
-    
     # If any of the individuals are 'other' the site is UNINFORMATIVE
     if gt_pb == 2 or gt_mo == 2 or gt_fa == 2:
         return 0

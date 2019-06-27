@@ -1,7 +1,6 @@
-import cyvcf2
 import pytest
 
-from upd.vcf_tools import (check_samples, get_vcf)
+from upd.vcf_tools import (check_samples, get_vcf, Vcf)
 
 def test_check_samples():
     ## GIVEN a list three samples
@@ -39,7 +38,7 @@ def test_get_vcf(vcf_path):
     vcf_obj = get_vcf(vcf_path, proband, mother, father)
     
     ## THEN assert that vcf_obj has the correct type
-    assert isinstance(vcf_obj, cyvcf2.VCF)
+    assert isinstance(vcf_obj, Vcf)
 
 def test_get_nonexisting_vcf():
     ## GIVEN the path to a non existing VCF and the individuals that should be there
@@ -60,7 +59,7 @@ def test_get_wrong_formated_vcf(ped_path):
     father = 'TEST_FATHER'
     
     ## WHEN getting the vcf
-    with pytest.raises(OSError):
+    with pytest.raises(SyntaxError):
     ## THEN assert a non OSError is raised
         vcf_obj = get_vcf(ped_path, proband, mother, father)
 

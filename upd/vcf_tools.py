@@ -5,9 +5,6 @@ import re
 from codecs import (open, getreader)
 from pprint import pprint as pp
 
-from cyvcf2 import VCF
-
-
 LOG = logging.getLogger(__name__)
 
 
@@ -25,7 +22,7 @@ def open_file(filename):
 class Variant(object):
     """Implements a Variant class for VCF variants
     
-    gt_types: HOM_REF=0, HET=1, HOM_ALT=2, UKNOWN=3
+    gt_types: 0=HOM_REF, 1=HET, 3=HOM_ALT, 2=other
     """
     def __init__(self, variant_line):
         super(Variant, self).__init__()
@@ -66,7 +63,7 @@ class Variant(object):
             gt_quals, gt_types (list)
         
         """
-        gt_map = {'0/0':0, '0/1':1,'1/1':2}
+        gt_map = {'0/0':0, '0/1':1,'1/1':3}
         gt_types = []
         gt_quals = []
         
@@ -76,7 +73,7 @@ class Variant(object):
             gt_quals.append(int(gt_info.get('GQ',0)))
             genotype = gt_info.get('GT','./.')
             if not genotype in gt_map:
-                gt_types.append(3)
+                gt_types.append(2)
                 continue
             gt_types.append(gt_map[genotype])
         
@@ -125,10 +122,10 @@ class HREC(object):
         }
         
 
-class My_Vcf(object):
-    """Implements a simple vcf parser"""
+class Vcf(object):
+    """Implements a simple vcf parser that mimics parts of cyvcf2.VCF"""
     def __init__(self, variant_file):
-        super(My_Vcf, self).__init__()
+        super(Vcf, self).__init__()
         self.variant_file = iter(variant_file)
         self.raw_header = []
         self.samples = []
@@ -198,7 +195,7 @@ class My_Vcf(object):
         return self
     
     def __repr__(self):
-        return f"{self.__class__.__name__}"
+        return f"{self.__class__.__name__} ({self.samples})"
 
 def check_samples(sids, proband, mother, father):
     """Check if proband, mother and father exists in vcf
@@ -231,7 +228,7 @@ def get_vcf(vcf_path, proband, mother, father):
         
     """
     vcf_handle = open_file(vcf_path)
-    vcf_reader = My_Vcf(vcf_handle)
+    vcf_reader = Vcf(vcf_handle)
     
     if not check_samples(vcf_reader.samples, proband, mother, father):
         raise SyntaxError("At least one of the given sample IDs do not exist in the VCF header")
