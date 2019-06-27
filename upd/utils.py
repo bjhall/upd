@@ -38,13 +38,16 @@ def upd_site_call(gt_pb, gt_mo, gt_fa):
         if gt_mo == opp and gt_fa == opp:
             return UNINFORMATIVE
         if gt_mo == opp:
+            LOG.debug("Found paternal upd")
             return UPD_PATERNAL_ORIGIN
         if gt_fa == opp:
+            LOG.debug("Found maternal upd")
             return UPD_MATERNAL_ORIGIN
         return PB_HOMOZYGOUS
         
     if gt_pb == 1:
         if gt_mo != 1 and gt_fa != 1 and gt_mo == opposite[gt_fa]:
+            LOG.debug("Found anti upd")
             return ANTI_UPD
         return PB_HETEROZYGOUS
 
