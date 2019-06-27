@@ -224,7 +224,7 @@ def get_vcf(vcf_path, proband, mother, father):
         father (str): ID of father in VCF
     
     Returns:
-        vcf_reader (cyvcf2.VCF)
+        vcf_reader (Vcf)
         
     """
     vcf_handle = open_file(vcf_path)
@@ -256,7 +256,7 @@ def parse_CSQ_header(reader):
     """Parse the order of VEP fields from the vcf header
     
     Args:
-        reader (cyvcf2.VCF)
+        reader (Vcf)
 
     Returns:
         csq_format (list(str)): A list with the VEP header
@@ -275,7 +275,7 @@ def get_pop_AF(variant, vep_fields, af_tag):
     """Extract population frequency from VEP annotations.
     
     Args:
-        variant (cyvcf2.Variant)
+        variant (Variant)
         vep_fields (list): Description of VEP annotation
         af_tag (str): Name of AF field to parse
     
