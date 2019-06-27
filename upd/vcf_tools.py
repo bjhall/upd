@@ -70,7 +70,12 @@ class Variant(object):
         form = var_info[8].split(':')
         for ind_info in var_info[9:]:
             gt_info = dict(zip(form, ind_info.split(':')))
-            gt_quals.append(int(gt_info.get('GQ',0)))
+            gq = 0
+            try:
+                gq = int(gt_info.get('GQ',0))
+            except Exception as err:
+                pass
+            gt_quals.append(gq)
             genotype = gt_info.get('GT','./.')
             if not genotype in gt_map:
                 gt_types.append(2)
