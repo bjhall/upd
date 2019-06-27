@@ -96,11 +96,12 @@ def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, logl
             LOG.warning("The field %s does not exist in the VEP annotations", af_tag)
             LOG.info("Existing CSQ fields {}".format('|'.join(csq_fields)))
             context.abort()
+
     else:
         if not vcf_reader.contains(af_tag):
             LOG.warning("The field %s does not exist in the VCF", af_tag)
             context.abort()
-    
+
     # Get all UPD informative sites into a list 
     context.obj['site_calls'] = get_UPD_informative_sites(
         vcf=vcf_reader,
