@@ -28,7 +28,6 @@ def upd_site_call(gt_pb, gt_mo, gt_fa):
     """
 
     opposite = {0:3, 3:0}
-    
     # If any of the individuals are 'other' the site is UNINFORMATIVE
     if gt_pb == 2 or gt_mo == 2 or gt_fa == 2:
         return 0
@@ -38,13 +37,16 @@ def upd_site_call(gt_pb, gt_mo, gt_fa):
         if gt_mo == opp and gt_fa == opp:
             return UNINFORMATIVE
         if gt_mo == opp:
+            LOG.debug("Found paternal upd")
             return UPD_PATERNAL_ORIGIN
         if gt_fa == opp:
+            LOG.debug("Found maternal upd")
             return UPD_MATERNAL_ORIGIN
         return PB_HOMOZYGOUS
         
     if gt_pb == 1:
         if gt_mo != 1 and gt_fa != 1 and gt_mo == opposite[gt_fa]:
+            LOG.debug("Found anti upd")
             return ANTI_UPD
         return PB_HETEROZYGOUS
 
@@ -56,12 +58,12 @@ def get_UPD_informative_sites(vcf, csq_fields, proband, mother, father, min_af=0
     """Get UPD calls for each informative SNP above given pop freq
     
     Args:
-        vcf (cyvcf2.VCF)
+        vcf (upd.vcf_tools.Vcf)
         min_af (float): Minimum allele frequency to consider SNP
         af_tag (str): Key to AF in annotation
         min_gq (int): Minimum GQ to consider variant
         csq_fields (list): describes VEP annotation
-        sids (cyvcf2.samples): describes what position inds have in VCF
+        sids (list): describes what position inds have in VCF
         proband (str): ID of proband in VCF
         mother (str): ID of mother in VCF
         father (str): ID of father in VCF

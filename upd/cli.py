@@ -2,6 +2,7 @@ import logging
 
 import coloredlogs
 import click
+import datetime
 
 from pprint import pprint as pp
 
@@ -76,6 +77,7 @@ def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, logl
     LOG.info("Running upd version %s", __version__)
 
     context.obj = {}
+    context.obj['start_time'] = datetime.datetime.now()
     # Check if the given samples IDs exist in the VCF header
     try:
         vcf_reader = get_vcf(vcf, proband, mother, father)
@@ -96,11 +98,12 @@ def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, logl
             LOG.warning("The field %s does not exist in the VEP annotations", af_tag)
             LOG.info("Existing CSQ fields {}".format('|'.join(csq_fields)))
             context.abort()
+
     else:
         if not vcf_reader.contains(af_tag):
             LOG.warning("The field %s does not exist in the VCF", af_tag)
             context.abort()
-    
+
     # Get all UPD informative sites into a list 
     context.obj['site_calls'] = get_UPD_informative_sites(
         vcf=vcf_reader,
@@ -140,6 +143,9 @@ def regions(context, min_sites, min_size, out):
     with click.open_file(out, 'w') as f:
         for line in out_lines:
             f.write(line+'\n')
+    
+    end_time = datetime.datetime.now() - context.obj['start_time']
+    LOG.info(f"Time to parse variants {end_time}")
 
 
 @cli.command()
@@ -164,3 +170,6 @@ def sites(context, out):
                 scall['pos'],
                 site_type_name[scall['call']]
             ))
+
+    end_time = datetime.datetime.now() - context.obj['start_time']
+    LOG.info(f"Time to parse variants {end_time}")

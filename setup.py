@@ -20,6 +20,7 @@ DESCRIPTION = 'Simple software to call UPD regions from germline exome/wgs trios
 URL = 'https://github.com/bjhall/upd'
 EMAIL = 'bjorn.hallstrom@skane.se'
 AUTHOR = 'Björn Hallström'
+REQUIRES_PYTHON = '>=3.6'
 VERSION = None
 
 
@@ -136,6 +137,7 @@ setup(
     description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type='text/markdown',
+    python_requires=REQUIRES_PYTHON,
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
@@ -155,10 +157,8 @@ setup(
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: 3.6',
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Unix",
         "Intended Audience :: Science/Research",
