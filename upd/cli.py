@@ -58,18 +58,19 @@ def print_version(ctx, param, value):
     default=30,
     show_default=True
 )
-@click.option('--loglevel', 
-    default='INFO', 
+@click.option('--loglevel',
+    default='INFO',
     type=click.Choice(LOG_LEVELS),
-    help="Set the level of log output.", 
+    help="Set the level of log output.",
     show_default=True
 )
-@click.option('--version', 
-    is_flag=True, 
+@click.option('--version',
+    is_flag=True,
     callback=print_version,
-    expose_value=False, 
+    expose_value=False,
     is_eager=True
 )
+
 @click.pass_context
 def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, loglevel):
     """Simple software to call UPD regions from germline exome/wgs trios"""
@@ -92,7 +93,7 @@ def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, logl
         except Exception as err:
             LOG.warning(err)
             context.abort()
-        
+
         # Make sure the given VEP field exists
         if af_tag not in csq_fields:
             LOG.warning("The field %s does not exist in the VEP annotations", af_tag)
@@ -104,7 +105,7 @@ def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, logl
             LOG.warning("The field %s does not exist in the VCF", af_tag)
             context.abort()
 
-    # Get all UPD informative sites into a list 
+    # Get all UPD informative sites into a list
     context.obj['site_calls'] = get_UPD_informative_sites(
         vcf=vcf_reader,
         csq_fields=csq_fields,
@@ -132,18 +133,25 @@ def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, logl
     type=click.Path(exists=False),
     default='-',
 )
+
+@click.option('--iso_het_pct',
+    help="Ratio iso/het for determening UPD type",
+    default=0.01,
+    show_default=True
+)
+
 @click.pass_context
-def regions(context, min_sites, min_size, out):
+def regions(context, min_sites, min_size, iso_het_pct, out):
     """Call UPD regions"""
     # Make region calls
     calls = call_regions(context.obj['site_calls'])
 
-    out_lines = output_filtered_regions(calls, min_sites, min_size)
+    out_lines = output_filtered_regions(calls, min_sites, min_size, iso_het_pct)
 
     with click.open_file(out, 'w') as f:
         for line in out_lines:
             f.write(line+'\n')
-    
+
     end_time = datetime.datetime.now() - context.obj['start_time']
     LOG.info(f"Time to parse variants {end_time}")
 
@@ -158,10 +166,10 @@ def regions(context, min_sites, min_size, out):
 def sites(context, out):
     """Prints the sites that are informative for UPD"""
     site_type_name = [
-        "UNINFORMATIVE", "UPD_MATERNAL_ORIGIN", "UPD_PATERNAL_ORIGIN", "ANTI_UPD", 
+        "UNINFORMATIVE", "UPD_MATERNAL_ORIGIN", "UPD_PATERNAL_ORIGIN", "ANTI_UPD",
         "PB_HOMOZYGOUS", "PB_HETEROZYGOUS"
     ]
-    
+
     with click.open_file(out, 'w') as f:
         for scall in context.obj['site_calls']:
             f.write("{}\t{}\t{}\t{}\n".format(
