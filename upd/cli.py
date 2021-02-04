@@ -134,7 +134,7 @@ def cli(context, vcf, proband, mother, father, af_tag, vep, min_af, min_gq, logl
     default='-',
 )
 
-@click.option('--iso_het_pct',
+@click.option('--iso-het-pct',
     help="Ratio iso/het for determening UPD type",
     default=0.01,
     show_default=True
