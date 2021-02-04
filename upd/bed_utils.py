@@ -1,12 +1,12 @@
 
-def output_filtered_regions(calls, min_sites=3, min_size=1000):
+def output_filtered_regions(calls, min_sites=3, min_size=1000, iso_het_pct=0.01):
     """Takes called regions, filters them, and yields annotated BED lines
-    
+
     Args:
         calls (iterable): An iterable with UPD regions
         min_sites (int): Minimum UPD informative sites required to call a region
         min_size (int): Minimum size (bp) required to call a region
-    
+        iso_het_pct(float): Quota between het-sites and hom-sties
     Yields:
         out_line (str): A formated string with the information about a region
     """
@@ -23,7 +23,7 @@ def output_filtered_regions(calls, min_sites=3, min_size=1000):
         # Rough estimation if heterodisomy or homodisomy/deletion
         het_pct = float(rcall['het_sites']) / float((rcall['het_sites']+rcall['hom_sites']))
         upd_type = "HETERODISOMY"
-        if het_pct < 0.01:
+        if het_pct < iso_het_pct:
             upd_type = "HOMODISOMY/DELETION"
 
         if lo_size < min_size:
