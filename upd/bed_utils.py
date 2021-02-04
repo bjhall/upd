@@ -24,7 +24,7 @@ def output_filtered_regions(calls, min_sites=3, min_size=1000, iso_het_pct=0.01)
         het_pct = float(rcall['het_sites']) / float((rcall['het_sites']+rcall['hom_sites']))
         upd_type = "HETERODISOMY"
         if het_pct < iso_het_pct:
-            upd_type = "HOMODISOMY/DELETION"
+            upd_type = "ISODISOMY/DELETION"
 
         if lo_size < min_size:
             continue

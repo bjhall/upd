@@ -8,6 +8,7 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 ### Added
 - Add argument to change the homozygozity rate cutoff for calling isodisomies
 ### Fixed
+- Change HOMODISOMY to ISODISOMY in the output files.
 ### Changed
 
 
