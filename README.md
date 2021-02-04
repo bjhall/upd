@@ -37,7 +37,7 @@ base | **--vep (flag)** | If given, search the CSQ field for `af-tag`
 regions | **--min-sites (DEFAULT: 3)** | Minimum number of consecutive UPD sites needed to call an UPD region.
 regions | **--min-size (DEFAULT: 1000)** | Minimum number of base pairs between first and last UPD site in a region required to call it.
 regions/sites | **--out (DEFAULT: stdout)** | If the results should be printed to a file
-regions/sites | **--iso_het_pct (DEFAULT: 0.01)** | Threshold ratio for calling homodisomy
+regions/sites | **--iso-het-pct (DEFAULT: 0.01)** | Threshold ratio for calling homodisomy
 
 
 ### Output
